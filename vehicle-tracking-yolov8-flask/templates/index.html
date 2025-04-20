@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Tracking Web App</title>
+</head>
+<body>
+    <h1>Vehicle Tracking with YOLOv8</h1>
+    <h3>Upload a video for processing:</h3>
+
+    <form action="/process_video" method="POST" enctype="multipart/form-data">
+        <label for="video-upload">Choose a video (MP4 format):</label>
+        <input type="file" name="video" id="video-upload" accept="video/mp4" required title="Select an MP4 video file">
+        <input type="submit" value="Upload and Process Video" title="Click to upload and process the video">
+    </form>
+
+    <h3>Results:</h3>
+    <div id="results">
+        <p>Unique vehicles detected: <span id="unique-vehicles"></span></p>
+        <p>Vehicles per frame:</p>
+        <ul id="per-frame-stats"></ul>
+    </div>
+
+    <script>
+        // Handle the response and display results on the page
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const response = await fetch('/process_video', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            // Update results on the page
+            document.getElementById('unique-vehicles').textContent = data.unique_vehicles;
+
+            const perFrameStats = document.getElementById('per-frame-stats');
+            perFrameStats.innerHTML = '';
+            for (const [vehicle, count] of Object.entries(data.per_frame_stats)) {
+                const li = document.createElement('li');
+                li.textContent = `${vehicle}: ${count}`;
+                perFrameStats.appendChild(li);
+            }
+        });
+    </script>
+</body>
+</html>
